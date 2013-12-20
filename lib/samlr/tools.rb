@@ -11,6 +11,11 @@ require "samlr/tools/response_builder"
 require "samlr/tools/metadata_builder"
 require "samlr/tools/logout_request_builder"
 
+if RUBY_ENGINE == 'jruby'
+  $CLASSPATH << File.join(File.dirname(__FILE__), "..", "..", "ext")
+  import "Canonicalize" unless defined?("Java::Default::Canonicalize")
+end
+
 module Samlr
   module Tools
     SHA_MAP = {
@@ -32,7 +37,7 @@ module Samlr
     # Accepts a document and optionally :path => xpath, :c14n_mode => c14n_mode
     def self.canonicalize(xml, options = {})
       options  = { :c14n_mode => C14N }.merge(options)
-      document = Nokogiri::XML(xml) { |c| c.strict.noblanks }
+      document = xml.is_a?(Nokogiri::XML::Element) ? xml : Nokogiri::XML(xml) { |c| c.strict.noblanks }
 
       if path = options[:path]
         node = document.at(path, NS_MAP)
@@ -40,7 +45,11 @@ module Samlr
         node = document
       end
 
-      node.canonicalize(options[:c14n_mode], options[:namespaces])
+      if RUBY_ENGINE == 'jruby'
+        Java::Default::Canonicalize.run(node.to_s)
+      else
+        node.canonicalize(options[:c14n_mode], options[:namespaces])
+      end
     end
 
     # Generate an xs:NCName conforming UUID
