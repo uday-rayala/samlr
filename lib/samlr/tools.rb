@@ -11,8 +11,11 @@ require "samlr/tools/response_builder"
 require "samlr/tools/metadata_builder"
 require "samlr/tools/logout_request_builder"
 
+
 if RUBY_ENGINE == 'jruby'
-  $CLASSPATH << File.join(File.dirname(__FILE__), "..", "..", "ext")
+  ext = File.join(File.dirname(__FILE__), "..", "..", "ext")
+  $CLASSPATH << ext
+  Dir.glob("#{ext}/*.jar").each { |f| $CLASSPATH << f }
   import "Canonicalize" unless defined?("Java::Default::Canonicalize")
 end
 
