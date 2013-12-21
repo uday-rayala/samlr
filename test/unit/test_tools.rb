@@ -8,9 +8,9 @@ describe Samlr::Tools do
       @fixture = fixed_saml_response.document.to_xml
     end
 
-    it "should namespace the SignedInfo element" do
+    it "should namespace the SignedI  nfo element" do
       path = "/samlp:Response/ds:Signature/ds:SignedInfo"
-      assert_match '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">', Samlr::Tools.canonicalize(@fixture, { :path => path })
+      assert_match '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"></SignatureMethod>', Samlr::Tools.canonicalize(@fixture, { :path => path })
     end
   end
 

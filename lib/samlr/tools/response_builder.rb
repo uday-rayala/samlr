@@ -100,7 +100,7 @@ module Samlr
         certificate  = options[:certificate] || Samlr::Tools::CertificateBuilder.new
         element      = document.at("//*[@ID='#{element_id}']")
         digest       = digest(document, element, options)
-        canoned      = digest.at("./ds:SignedInfo", NS_MAP).canonicalize(C14N)
+        canoned      = Samlr::Tools.canonicalize(digest.at("./ds:SignedInfo", NS_MAP), {:c14n_mode => C14N})
         signature    = certificate.sign(canoned)
         skip_keyinfo = options[:skip_keyinfo]
 
@@ -126,6 +126,9 @@ module Samlr
         namespaces    = options[:namespaces]    || [ "#default", "samlp", "saml", "ds", "xs", "xsi" ]
 
         canoned       = Samlr::Tools.canonicalize(element, { :c14n_mode => C14N, :namespaces => namespaces})
+        puts "**************************"
+        puts canoned
+        puts "**************************"
         digest_value  = Base64.encode64(OpenSSL::Digest::SHA1.new.digest(canoned)).delete("\n")
 
         builder = Nokogiri::XML::Builder.new(:encoding => "UTF-8") do |xml|
